@@ -73,17 +73,16 @@ begin
       -- change values of LHS and RHS depernding on the state
    begin
       case state is
-      when IdleState | Stage1 =>
+      when IdleState | Stage1 | Stage2 =>
          LHS <= A(7 downto 0);
-         RHS <= B(7 downto 0);
-      when Stage2 =>
-         LHS <= A(7 downto 0);
-         RHS <= B(15 downto 8);
-      when Stage3 =>
+      when Stage3 | stage4=>
          LHS <= A(15 downto 8);
+      end case;
+      
+      case state is
+      when IdleState | Stage1 | Stage3 =>
          RHS <= B(7 downto 0);
-      when Stage4 =>
-         LHS <= A(15 downto 8);
+      when Stage2 | Stage4 =>
          RHS <= B(15 downto 8);
       end case;
    end process Comb;
