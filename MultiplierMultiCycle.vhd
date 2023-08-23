@@ -40,11 +40,12 @@ begin
          state    <= IdleState;
          Complete <= '0';
       elsif rising_edge(clock) then
+      
+      -- Manage State Machine
          case state is
             when IdleState =>
                if (start = '1') then
                   state    <= Stage1;
-                  Complete <= '0';
                else
                   state <= IdleState;
                end if;
@@ -56,8 +57,14 @@ begin
                state <= Stage4;
             when Stage4 => 
                state <= IdleState;
-               Complete <= '1';
-
+         end case;
+         
+     -- Manage Complete Signal
+         case state is
+            when Stage4 =>
+                Complete <= '1';
+            when others =>
+                Complete <= '0';
          end case;
       end if;
  
@@ -69,7 +76,7 @@ begin
    -- 
    Comb: -- combinational paths
    process( state )
-      -- watching for changes in state, A, B
+      -- watching for changes in stat
       -- change values of LHS and RHS depernding on the state
    begin
       case state is
@@ -99,29 +106,26 @@ begin
       elsif rising_edge(clock) then
          case state is
             when IdleState =>
-                null;
+                Result <= Result;
             -- Multiply seccond byte of A and B
             when Stage1 =>
                -- set first half of Result is 0, seccond half is Multipe
                Result <= (others => '0');
                Result(15 downto 0) <= Product;
 
-            -- Multiply seccond byte of A with first byte of B
+            -- Multiply seccond byte of A with first byte of B. Both are 17 bit adders so same hardware can be used.
             when Stage2 =>
                -- add existing value of Q(15 downto 8) with Multiple. Overflow is not possible
-               --Result <= Result + (x"00" & Product & x"00");
                Result(24 downto 8) <= Result(24 downto 8) + Product;
 
             -- Multiply first byte of A with second byte of B
             when Stage3 =>
                -- add existing value of Q(15 downto 8) with Multiple. Overflow is possible
-               --Result <= Result + (x"00" & Product & x"00");
                Result(24 downto 8) <= Result(24 downto 8) + Product;
          
             -- Multiply first byte of A and B
             when Stage4 =>
                -- add existing value of Q(31 downto 16) with Multiple. Overflow is not possible
-               --Result <= Result + (Product & x"0000");
                Result(31 downto 16) <= Result(31 downto 16) + Product;
                
          end case;
